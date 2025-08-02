@@ -1,13 +1,11 @@
 name: Update obfs4 Bridges
 on:
-  schedule:
-    - cron: "0 0 * * *" # هر روز ساعت 00:00 UTC
-  workflow_dispatch: # امکان اجرای دستی
+  workflow_dispatch: # فقط اجرای دستی
 jobs:
   update-bridges:
     runs-on: ubuntu-latest
     permissions:
-      contents: write  # دسترسی نوشتن
+      contents: write
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -32,4 +30,4 @@ jobs:
           git commit -m "Update obfs4 bridges" || echo "No changes to commit"
           git push
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # توکن داخلی GitHub Actions
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
