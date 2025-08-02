@@ -1,4 +1,5 @@
 import requests
+from bs4 import BeautifulSoup
 import os
 
 def fetch_obfs4_bridges():
@@ -15,13 +16,24 @@ def fetch_obfs4_bridges():
         response = requests.get(url, headers=headers, timeout=20)
         print(f"کد وضعیت: {response.status_code}")
         print(f"پاسخ کامل (1000 کاراکتر اول): {response.text[:1000]}")
+        
         if response.status_code == 200:
-            bridges = [line.strip() for line in response.text.splitlines() if line.startswith("obfs4")]
-            if bridges:
-                print(f"پل‌های دریافت‌شده: {bridges}")
-                return bridges
+            # پردازش HTML با BeautifulSoup
+            soup = BeautifulSoup(response.text, 'html.parser')
+            bridge_div = soup.find('div', id='bridgelines')
+            if bridge_div:
+                # گرفتن تمام خطوط داخل div
+                lines = bridge_div.get_text().splitlines()
+                # فیلتر کردن خطوطی که با obfs4 شروع می‌شن
+                bridges = [line.strip() for line in lines if line.strip().startswith("obfs4")]
+                if bridges:
+                    print(f"پل‌های دریافت‌شده: {bridges}")
+                    return bridges
+                else:
+                    print("هیچ پل obfs4 پیدا نشد! ممکنه ساختار HTML عوض شده باشه.")
+                    return None
             else:
-                print("هیچ پل obfs4 پیدا نشد! پاسخ ممکنه HTML یا خطا باشه.")
+                print("تگ <div id='bridgelines'> پیدا نشد!")
                 return None
         else:
             print(f"خطا در اتصال به BridgeDB: {response.status_code}, پاسخ: {response.text[:1000]}")
