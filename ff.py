@@ -5,16 +5,26 @@ def fetch_obfs4_bridges():
     """گرفتن پل‌های obfs4 از BridgeDB"""
     try:
         url = "https://bridges.torproject.org/bridges?transport=obfs4"
-        response = requests.get(url, timeout=10)
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+            "Accept-Language": "en-US,en;q=0.9",
+            "Connection": "keep-alive"
+        }
+        print(f"در حال ارسال درخواست به: {url} با هدر: {headers}")
+        response = requests.get(url, headers=headers, timeout=20)
+        print(f"کد وضعیت: {response.status_code}")
+        print(f"پاسخ کامل (1000 کاراکتر اول): {response.text[:1000]}")
         if response.status_code == 200:
             bridges = [line.strip() for line in response.text.splitlines() if line.startswith("obfs4")]
             if bridges:
+                print(f"پل‌های دریافت‌شده: {bridges}")
                 return bridges
             else:
-                print("هیچ پل obfs4 پیدا نشد!")
+                print("هیچ پل obfs4 پیدا نشد! پاسخ ممکنه HTML یا خطا باشه.")
                 return None
         else:
-            print(f"خطا در اتصال به BridgeDB: {response.status_code}")
+            print(f"خطا در اتصال به BridgeDB: {response.status_code}, پاسخ: {response.text[:1000]}")
             return None
     except Exception as e:
         print(f"خطا در گرفتن پل‌ها: {str(e)}")
